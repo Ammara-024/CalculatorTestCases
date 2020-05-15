@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="angular.png" type="image/png" sizes="16x16">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.css"></script>
+    <script src="JQuery.js"></script>
+
+    <title>JQuery</title>
+	<script>
+	
+    $(document).ready(function () {
+
+
+        displayData();
+
+    $("#btnSubmit").click(function () {
+
+        addCourse();
+    });
+
+    $("#btnSave").click(function () {
+
+        updateCourse();
+        
+
+    });
+
+});
+
+
+
+var ID = "";
+//Used to fetch Data on Modal Dialog
+function editCourse(id)
+{
+        alert(id);
+    ID = id;
+    var editURL = "http://labapi.somee.com/api/Course/" + id;
+    $.ajax({
+        type: "GET",
+        url: editURL,
+        success: function (data) {
+        $('#course_name').val(data.courseName);
+            $('#course_code').val(data.courseCode);
+
+        },
+        failure: function (data) {
+        alert("Not getting it");
+        },
+
+        error: function (data) {
+        alert("Error " + data);
+        }
+
+    });
+}
+
+//Used to update Data from table
+function updateCourse() {
+        console.log(ID);
+
+    var name = $('#course_name').val();
+    var code = $('#course_code').val();
+
+    var jsonobj = {courseName: name, courseCode: code};
+    var updateURL = "http://labapi.somee.com/api/Course/" + ID;
+
+    $.ajax({
+        type: "PUT",
+        url: updateURL,
+        data: JSON.stringify(jsonobj),
+        contentType: "application/json;charset=utf-8",
+
+        success: function (data) {
+        
+            $("#emptybody").html("");
+            Swal.fire(
+                'Good job!',
+                'You Updated the button!',
+                'success'
+            )
+
+        },
+
+        failure: function (data) {
+        alert("Failure is running");
+        },
+
+        error: function (data) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+                footer: 'Error, is your internet working?'
+            })
+        }
+    });
+}
+
+//Used to add Data in Table
+function addCourse() {
+
+    var name = $('#course_Name').val();
+    var code = $('#course_Code').val();
+
+
+    var jsonobj = {courseName: name, courseCode: code }
+
+    $.ajax({
+        type: "POST",
+        url: "http://labapi.somee.com/api/Course",
+        data: JSON.stringify(jsonobj),
+        success: function (data) {
+
+        $("#emptybody").append("<tr><td>" + data.Id + "</td> " + "<td>" + name + "</td>" + "<td>" + code + "</td>" + "</td>" + "<td><button type = 'button' class = 'btn btn-info' data-toggle='modal' data-target='#exampleModal' onclick= editCourse('" + data.Id + "')>Edit</button></td>" + "<td><button type = 'button' class = 'btn btn-danger' onclick= deleteCourse('" + data.Id + "')>Delete</button></td></tr> ");
+
+            Swal.fire(
+                'Good job!',
+                'You Added a record',
+                'success'
+            )
+
+
+
+        },
+
+        failure: function (data) {
+        alert("Not getting it");
+        },
+
+        error: function (data) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            footer: 'Error, is your internet working?'
+        })
+    }
+    });
+}
+
+//Used to Display Data in Table when page loads
+function displayData() {
+        $("#emptybody").html("");
+
+    $.ajax({
+        type: "GET",
+        url: "http://labapi.somee.com/api/Course",
+        success: function (data) {
+            for (d in data) {
+        $("#emptybody").append("<tr><td>" + data[d].Id + "</td> " + "<td>" + data[d].courseName + "</td>" + "<td>" + data[d].courseCode + "</td>" + "</td>" + "<td><button type = 'button' class = 'btn btn-info' data-toggle='modal' data-target='#exampleModal' onclick= editCourse('" + data[d].Id + "')>Edit</button></td>" + "<td><button type = 'button' class = 'btn btn-danger' onclick= deleteCourse('" + data[d].Id + "')>Delete</button></td></tr> ");
+            }
+        },
+        failure: function (data) {
+        alert("Not getting it");
+        },
+
+        error: function (data) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            footer: 'Error, is your internet working?'
+        })
+    }
+
+    });
+}
+
+//Used to deete Data in Table
+function deleteCourse(id)
+{
+    var deleteURL = "http://labapi.somee.com/api/Course/" + id;
+
+    $.ajax({
+        type: "DELETE",
+        url: deleteURL,
+        success: function (data) {
+        $("#emptybody").html("");
+            displayData();
+
+            Swal.fire(
+                'Good job!',
+                'You Deleted a record',
+                'success'
+            )
+
+        },
+        failure: function (data) {
+        alert("Not getting it");
+        },
+
+        error: function (data) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            footer: 'Error, is your internet working?'
+        })
+    }
+
+    });
+}
+
+	</script>
+</head>
+
+
+<body>
+
+    <div class="container">
+        <h1>Course Data</h1>
+        <div class="col-lg-4">
+            <div class="form-group">
+                <label for="Id">Course Name:</label>
+                <input type="text" class="form-control" id="course_Name" placeholder="Course Name">
+            </div>
+            <div class="form-group">
+                <label for="Name">Course Code:</label>
+                <input type="text" class="form-control" id="course_Code" placeholder="Course Code">
+            </div>
+
+
+            <button type="button" id="btnSubmit" class="btn btn-primary">Submit</button>
+        </div>
+
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Course Name</th>
+                    <th>Course Code</th>
+
+                </tr>
+            </thead>
+            <tbody id="emptybody">
+            </tbody>
+        </table>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Person</h5>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="Name">Course Name:</label>
+                            <input type="text" class="form-control" id="course_name" placeholder="ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="Code">Couse Code:</label>
+                            <input type="text" class="form-control" id="course_code" placeholder="Name">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="btnSave">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
